@@ -1,0 +1,36 @@
+# Pricing as of 2026-05-02. Verify against provider docs before production use.
+models:
+  - provider: openai
+    model_id: gpt-4o
+    input_cost_per_1k: 0.0025
+    output_cost_per_1k: 0.01
+    avg_latency_ms: 800
+    quality_tier: complex
+
+  - provider: openai
+    model_id: gpt-4o-mini
+    input_cost_per_1k: 0.00015
+    output_cost_per_1k: 0.0006
+    avg_latency_ms: 400
+    quality_tier: moderate
+
+  - provider: anthropic
+    model_id: claude-sonnet-4-6
+    input_cost_per_1k: 0.003
+    output_cost_per_1k: 0.015
+    avg_latency_ms: 700
+    quality_tier: complex
+
+  - provider: anthropic
+    model_id: claude-haiku-4-5
+    input_cost_per_1k: 0.0008
+    output_cost_per_1k: 0.004
+    avg_latency_ms: 350
+    quality_tier: moderate
+
+  - provider: ollama
+    model_id: llama3.2:3b
+    input_cost_per_1k: 0.0
+    output_cost_per_1k: 0.0
+    avg_latency_ms: 1500
+    quality_tier: simple
