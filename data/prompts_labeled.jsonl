@@ -1,0 +1,30 @@
+{"prompt": "What is 2 + 2?", "tier": "simple"}
+{"prompt": "Translate 'hello' to French.", "tier": "simple"}
+{"prompt": "Extract the email from: Contact me at jane@example.com.", "tier": "simple"}
+{"prompt": "Convert 100 km to miles.", "tier": "simple"}
+{"prompt": "Reverse the string 'autopilot'.", "tier": "simple"}
+{"prompt": "What is the capital of France?", "tier": "simple"}
+{"prompt": "Capitalize the first letter of 'paris'.", "tier": "simple"}
+{"prompt": "Format this date in ISO 8601: March 5, 2026.", "tier": "simple"}
+{"prompt": "Count the words in: 'the quick brown fox'.", "tier": "simple"}
+{"prompt": "Spell out the number 42.", "tier": "simple"}
+{"prompt": "Summarize: The quick brown fox jumps over the lazy dog.", "tier": "moderate"}
+{"prompt": "Classify the sentiment of: I love this product.", "tier": "moderate"}
+{"prompt": "List three benefits of regular exercise.", "tier": "moderate"}
+{"prompt": "Write a short professional email declining a meeting.", "tier": "moderate"}
+{"prompt": "Extract name, email, and phone from: 'John Doe, jdoe@x.com, 555-1212'.", "tier": "moderate"}
+{"prompt": "Categorize this support ticket as billing, shipping, or technical: 'My package never arrived.'", "tier": "moderate"}
+{"prompt": "Rewrite this sentence in passive voice: The cat chased the mouse.", "tier": "moderate"}
+{"prompt": "Generate a JSON object with name and age fields for a fictional 30-year-old engineer.", "tier": "moderate"}
+{"prompt": "Explain in two sentences what a database index is.", "tier": "moderate"}
+{"prompt": "Convert this Python list to a comma-separated string: [1, 2, 3, 4, 5].", "tier": "moderate"}
+{"prompt": "Compare and analyze the trade-offs between SQL and NoSQL databases for a fintech startup, considering consistency, scalability, and operational complexity.", "tier": "complex"}
+{"prompt": "Design a sharding strategy for a multi-tenant Postgres database with hot tenants and explain how to handle rebalancing.", "tier": "complex"}
+{"prompt": "Critique the following architecture: a monolithic Django app serving 10M daily users with a single Redis cache. Suggest improvements with reasoning.", "tier": "complex"}
+{"prompt": "Argue both sides of whether event sourcing is appropriate for a payments ledger, then give your recommendation.", "tier": "complex"}
+{"prompt": "Derive the optimal caching strategy for a read-heavy social feed with eventual consistency requirements, including invalidation rules.", "tier": "complex"}
+{"prompt": "Predict three failure modes of a distributed Kafka pipeline under network partition and propose mitigations for each.", "tier": "complex"}
+{"prompt": "Write a 200-word essay analyzing why Kubernetes adoption stalled at mid-sized companies in 2024, citing technical and organizational factors.", "tier": "complex"}
+{"prompt": "Synthesize a migration plan from a monorepo to polyrepo for a 50-engineer team, addressing CI, dependency management, and code ownership.", "tier": "complex"}
+{"prompt": "Reason through whether to use server-sent events or WebSockets for a real-time collaborative editor with 100 concurrent users per document.", "tier": "complex"}
+{"prompt": "Justify a choice of vector database (pgvector vs Pinecone vs Weaviate) for a RAG system with 10M documents and sub-100ms latency requirements.", "tier": "complex"}
