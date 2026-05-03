@@ -28,3 +28,182 @@
 {"prompt": "Synthesize a migration plan from a monorepo to polyrepo for a 50-engineer team, addressing CI, dependency management, and code ownership.", "tier": "complex"}
 {"prompt": "Reason through whether to use server-sent events or WebSockets for a real-time collaborative editor with 100 concurrent users per document.", "tier": "complex"}
 {"prompt": "Justify a choice of vector database (pgvector vs Pinecone vs Weaviate) for a RAG system with 10M documents and sub-100ms latency requirements.", "tier": "complex"}
+{"prompt": "What is 7 times 8?", "tier": "simple"}
+{"prompt": "Translate 'good morning' to Spanish.", "tier": "simple"}
+{"prompt": "Translate 'thank you' to Japanese.", "tier": "simple"}
+{"prompt": "Translate 'goodbye' to German.", "tier": "simple"}
+{"prompt": "What is the square root of 144?", "tier": "simple"}
+{"prompt": "Convert 32 degrees Fahrenheit to Celsius.", "tier": "simple"}
+{"prompt": "Convert 5 feet to centimeters.", "tier": "simple"}
+{"prompt": "How many sides does a hexagon have?", "tier": "simple"}
+{"prompt": "Convert binary 1010 to decimal.", "tier": "simple"}
+{"prompt": "Convert hex FF to decimal.", "tier": "simple"}
+{"prompt": "What year did World War 2 end?", "tier": "simple"}
+{"prompt": "What is the capital of Japan?", "tier": "simple"}
+{"prompt": "What is the capital of Australia?", "tier": "simple"}
+{"prompt": "Who wrote Romeo and Juliet?", "tier": "simple"}
+{"prompt": "What is the chemical symbol for gold?", "tier": "simple"}
+{"prompt": "What is the chemical symbol for sodium?", "tier": "simple"}
+{"prompt": "Lowercase the string 'HELLO WORLD'.", "tier": "simple"}
+{"prompt": "Uppercase the string 'hello world'.", "tier": "simple"}
+{"prompt": "Remove whitespace from '  hello  '.", "tier": "simple"}
+{"prompt": "Reverse the string 'racecar'.", "tier": "simple"}
+{"prompt": "Extract the phone number from: 'Call me at 555-1234'.", "tier": "simple"}
+{"prompt": "Extract the URL from: 'Visit https://example.com today'.", "tier": "simple"}
+{"prompt": "Extract the year from: 'Released in 2023'.", "tier": "simple"}
+{"prompt": "Extract the price from: 'It costs $19.99'.", "tier": "simple"}
+{"prompt": "Extract the zip code from: 'Mailing address 90210 USA'.", "tier": "simple"}
+{"prompt": "Get the first character of 'autopilot'.", "tier": "simple"}
+{"prompt": "Get the last character of 'autopilot'.", "tier": "simple"}
+{"prompt": "Add 17 and 23.", "tier": "simple"}
+{"prompt": "Subtract 9 from 41.", "tier": "simple"}
+{"prompt": "Divide 100 by 4.", "tier": "simple"}
+{"prompt": "Multiply 6 and 9.", "tier": "simple"}
+{"prompt": "What is 10 percent of 250?", "tier": "simple"}
+{"prompt": "What day of the week is January 1, 2026?", "tier": "simple"}
+{"prompt": "How many days are in February 2024?", "tier": "simple"}
+{"prompt": "What is the plural of 'mouse'?", "tier": "simple"}
+{"prompt": "What is the past tense of 'run'?", "tier": "simple"}
+{"prompt": "What is the opposite of 'hot'?", "tier": "simple"}
+{"prompt": "What is the opposite of 'fast'?", "tier": "simple"}
+{"prompt": "Format the number 1234567 with commas.", "tier": "simple"}
+{"prompt": "Format the date 2026-01-15 as MM/DD/YYYY.", "tier": "simple"}
+{"prompt": "Truncate '0123456789' to the first 5 characters.", "tier": "simple"}
+{"prompt": "Trim trailing punctuation from 'hello!!!'.", "tier": "simple"}
+{"prompt": "What is the boiling point of water in Celsius?", "tier": "simple"}
+{"prompt": "What is the freezing point of water in Fahrenheit?", "tier": "simple"}
+{"prompt": "How many minutes are in 3 hours?", "tier": "simple"}
+{"prompt": "How many seconds are in 5 minutes?", "tier": "simple"}
+{"prompt": "Convert 1 GB to MB.", "tier": "simple"}
+{"prompt": "Convert 60 mph to km/h.", "tier": "simple"}
+{"prompt": "What is the largest planet in our solar system?", "tier": "simple"}
+{"prompt": "What color do you get when you mix blue and yellow?", "tier": "simple"}
+{"prompt": "How many continents are there?", "tier": "simple"}
+{"prompt": "What is the smallest prime number?", "tier": "simple"}
+{"prompt": "What is the value of pi to 2 decimal places?", "tier": "simple"}
+{"prompt": "Summarize this paragraph in one sentence: Photosynthesis is the process plants use to convert sunlight into chemical energy stored in glucose, releasing oxygen as a byproduct.", "tier": "moderate"}
+{"prompt": "Classify this email as spam or not spam: 'Congratulations! You have won a free iPhone, click here to claim.'", "tier": "moderate"}
+{"prompt": "Classify this customer review (1-5 stars): 'The product arrived broken and customer service ignored my emails.'", "tier": "moderate"}
+{"prompt": "Write a polite reminder email about an overdue invoice.", "tier": "moderate"}
+{"prompt": "Write a 3-line LinkedIn post announcing a job promotion.", "tier": "moderate"}
+{"prompt": "Generate a markdown table with 3 rows comparing Python, Go, and Rust on syntax simplicity.", "tier": "moderate"}
+{"prompt": "Generate a YAML config snippet for a basic nginx reverse proxy to localhost:3000.", "tier": "moderate"}
+{"prompt": "Convert this CSV row to JSON: 'name,age,city\\nAlice,30,NYC'.", "tier": "moderate"}
+{"prompt": "Extract action items from these meeting notes: 'Bob will draft the spec by Friday. Alice owns the design review. Carol will follow up with the client next week.'", "tier": "moderate"}
+{"prompt": "Identify the main entity (person, company, location) in: 'Tim Cook announced new iPads at the Apple campus in Cupertino.'", "tier": "moderate"}
+{"prompt": "Generate three test cases for a function that returns whether a year is a leap year.", "tier": "moderate"}
+{"prompt": "Translate this short paragraph from Spanish to English: 'El gato negro durmio en el sofa toda la tarde.'", "tier": "moderate"}
+{"prompt": "Explain in 3-4 sentences how HTTP cookies work.", "tier": "moderate"}
+{"prompt": "Explain the difference between a stack and a queue in 2 sentences.", "tier": "moderate"}
+{"prompt": "Write a regex that matches a US zip code (5 digits or 5+4 format).", "tier": "moderate"}
+{"prompt": "Categorize the following bug report as P1, P2, or P3: 'Login button is misaligned on Safari iOS.'", "tier": "moderate"}
+{"prompt": "Categorize the following bug as P1, P2, or P3: 'Production database connection pool exhausted under normal load.'", "tier": "moderate"}
+{"prompt": "Suggest 3 alternative subject lines for an email about a product launch.", "tier": "moderate"}
+{"prompt": "Compose a 2-paragraph cover letter for a junior frontend developer role.", "tier": "moderate"}
+{"prompt": "Write Python code that returns the nth Fibonacci number iteratively.", "tier": "moderate"}
+{"prompt": "Write a SQL query that returns the top 5 customers by total order amount from an orders table.", "tier": "moderate"}
+{"prompt": "Write a bash one-liner that finds all .log files modified in the last 24 hours.", "tier": "moderate"}
+{"prompt": "Format this raw text as a numbered markdown list: apples bananas cherries dates elderberries.", "tier": "moderate"}
+{"prompt": "Extract all hashtags from: 'Loving the #morningvibes #coffee #productivity #2026goals'.", "tier": "moderate"}
+{"prompt": "Identify the sentiment polarity (positive, negative, neutral) and confidence (high, medium, low) for: 'The food was OK but the wait was unreasonably long.'", "tier": "moderate"}
+{"prompt": "Rewrite this sentence to be more concise: 'In light of the fact that the meeting has been postponed until next week, we will need to revisit the agenda items at a later date.'", "tier": "moderate"}
+{"prompt": "Generate three open-ended interview questions for a backend engineering candidate.", "tier": "moderate"}
+{"prompt": "Generate a brief product description (under 50 words) for a noise-cancelling wireless headphone.", "tier": "moderate"}
+{"prompt": "Suggest a 5-day workout split for a beginner with access to a basic gym.", "tier": "moderate"}
+{"prompt": "Suggest a 7-day meal plan outline (just lunch and dinner, one line each) for someone targeting 1800 calories.", "tier": "moderate"}
+{"prompt": "Write a regex that captures key=value pairs from a query string like 'a=1&b=hello&c=true'.", "tier": "moderate"}
+{"prompt": "Convert this 12-hour time '7:45 PM' to 24-hour format and explain the rule briefly.", "tier": "moderate"}
+{"prompt": "Detect the language of: 'Bonjour, comment allez-vous aujourd hui?'", "tier": "moderate"}
+{"prompt": "Detect the language of: 'Guten Tag, wie geht es Ihnen?'", "tier": "moderate"}
+{"prompt": "List the steps required to deploy a static website to S3 with CloudFront in front.", "tier": "moderate"}
+{"prompt": "List 5 standard HTTP status codes and one-sentence meanings.", "tier": "moderate"}
+{"prompt": "Outline the structure of a typical README for an open source library.", "tier": "moderate"}
+{"prompt": "Outline the steps for setting up a Postgres database in Docker for local development.", "tier": "moderate"}
+{"prompt": "Convert this dictionary into YAML: {'name': 'app', 'replicas': 3, 'image': 'nginx:latest'}.", "tier": "moderate"}
+{"prompt": "Generate a one-paragraph release note for a feature: 'Added dark mode toggle to settings page'.", "tier": "moderate"}
+{"prompt": "Generate three feature ideas for a habit-tracking mobile app aimed at students.", "tier": "moderate"}
+{"prompt": "Identify three errors in this short essay: 'Their are many resons why people enjoys reading. Its a hobby that anyone could pickup.'", "tier": "moderate"}
+{"prompt": "Suggest a name for a project that delivers groceries via drone within 15 minutes.", "tier": "moderate"}
+{"prompt": "Compare REST and GraphQL in 2-3 sentences without recommending one.", "tier": "moderate"}
+{"prompt": "Write a polite Slack message rescheduling a one-on-one to next Tuesday.", "tier": "moderate"}
+{"prompt": "Convert these tasks into a checklist (markdown): write spec, get approval, build prototype, test internally, ship beta.", "tier": "moderate"}
+{"prompt": "Generate three multiple-choice questions about basic Python list operations (no answers).", "tier": "moderate"}
+{"prompt": "Write a tweet announcing a new podcast episode on prompt engineering.", "tier": "moderate"}
+{"prompt": "List the pros and cons of working from home in bullet points (3 each).", "tier": "moderate"}
+{"prompt": "Suggest three icebreaker questions for a remote team meeting.", "tier": "moderate"}
+{"prompt": "Outline the agenda for a 30-minute weekly engineering sync (5 sections).", "tier": "moderate"}
+{"prompt": "Estimate how long it would take to walk 5 km at a normal pace and show the calculation.", "tier": "moderate"}
+{"prompt": "Estimate how many tennis balls fit in a school bus, showing your reasoning briefly.", "tier": "moderate"}
+{"prompt": "Recommend a beginner-friendly book on system design and explain in one line why.", "tier": "moderate"}
+{"prompt": "Generate three blog post titles about reducing AWS spend.", "tier": "moderate"}
+{"prompt": "Write a short LinkedIn comment praising a colleague who just shipped a major feature.", "tier": "moderate"}
+{"prompt": "Translate this idiom literally and idiomatically into English: 'Avoir le coup de foudre'.", "tier": "moderate"}
+{"prompt": "Generate three commit message ideas for a refactor that splits a 1000-line module into 4 files.", "tier": "moderate"}
+{"prompt": "Suggest 3 ways to measure developer productivity beyond lines of code.", "tier": "moderate"}
+{"prompt": "Identify whether the sentence is a fact or opinion: 'The Earth is the third planet from the sun.'", "tier": "moderate"}
+{"prompt": "Identify whether the sentence is a fact or opinion: 'Pineapple belongs on pizza.'", "tier": "moderate"}
+{"prompt": "Generate a 4-line haiku about debugging.", "tier": "moderate"}
+{"prompt": "Generate a one-sentence elevator pitch for a SaaS that automates onboarding emails.", "tier": "moderate"}
+{"prompt": "Design a multi-region disaster recovery strategy for a Postgres-backed SaaS, including RPO/RTO targets, failover automation, and cost-vs-resilience trade-offs.", "tier": "complex"}
+{"prompt": "Critique a microservices architecture where 30 services share a single Postgres instance, identifying at least 4 systemic risks and ranking them by severity.", "tier": "complex"}
+{"prompt": "Argue both sides of adopting Rust over Go for a new team that currently writes Python services, then make a recommendation accounting for hiring constraints.", "tier": "complex"}
+{"prompt": "Derive a back-of-the-envelope cost model for serving 1M daily active users on a fully serverless AWS stack vs ECS Fargate, listing the dominant cost drivers.", "tier": "complex"}
+{"prompt": "Predict the cascading failure modes if a primary cache layer is removed from a recommendation API serving 10k QPS, and propose graceful degradation strategies.", "tier": "complex"}
+{"prompt": "Synthesize a 6-month roadmap for migrating a legacy Rails monolith to a service-oriented architecture without freezing feature work.", "tier": "complex"}
+{"prompt": "Reason through whether to build, buy, or open-source-fork an internal feature flag system for a 200-engineer org, including total cost of ownership.", "tier": "complex"}
+{"prompt": "Justify the choice between Kafka, Kinesis, and RabbitMQ for an analytics pipeline ingesting 50k events/sec with 30-day replay requirements.", "tier": "complex"}
+{"prompt": "Analyze why a recently launched B2B SaaS product has high signup but low 30-day retention, and propose a structured investigation plan with metrics to gather.", "tier": "complex"}
+{"prompt": "Design a permissioning model (with example schema) for a multi-tenant collaborative document app supporting per-document, per-folder, and org-wide roles.", "tier": "complex"}
+{"prompt": "Critique the following hiring funnel and propose 3 high-leverage changes: 1000 applicants -> 200 phone screens -> 80 onsites -> 5 offers -> 3 accepts.", "tier": "complex"}
+{"prompt": "Argue for or against deprecating an internal CLI tool used by 4 teams, accounting for migration cost, ongoing maintenance, and political dynamics.", "tier": "complex"}
+{"prompt": "Compare snapshot isolation, serializable, and read-committed isolation levels for a high-throughput orders table, recommending one with reasoning.", "tier": "complex"}
+{"prompt": "Design a content moderation pipeline for a UGC video platform handling 100k uploads/day, balancing latency, cost, and false-positive rates.", "tier": "complex"}
+{"prompt": "Predict three regulatory risks of launching an AI chatbot for legal advice in the EU and propose product-level mitigations for each.", "tier": "complex"}
+{"prompt": "Write a 300-word post-mortem for a 4-hour outage caused by a corrupted secondary index, including root cause, contributing factors, and 3 follow-up actions.", "tier": "complex"}
+{"prompt": "Synthesize the trade-offs between gRPC and REST for a public-facing API used by both web and mobile clients, with a final recommendation.", "tier": "complex"}
+{"prompt": "Reason through whether to invest in observability tooling now or after the next product launch, given current incident frequency and team bandwidth.", "tier": "complex"}
+{"prompt": "Critique a feature spec that proposes adding real-time collaborative editing to a forms product, identifying 5 concrete risks the spec ignores.", "tier": "complex"}
+{"prompt": "Design a billing system for a usage-based AI product with token metering, daily caps, prepaid credits, and overage alerting.", "tier": "complex"}
+{"prompt": "Argue both sides of using LLM-as-judge for production evaluation pipelines, including failure modes and cost implications.", "tier": "complex"}
+{"prompt": "Derive a decision matrix for choosing between Pinecone, pgvector, Qdrant, and Weaviate for a RAG system with strict tenancy isolation requirements.", "tier": "complex"}
+{"prompt": "Evaluate the trade-offs between fine-tuning a small open model vs prompting a large hosted model for an internal classification task.", "tier": "complex"}
+{"prompt": "Justify a refactor strategy for a 50k-line frontend app that has accumulated 8 years of jQuery, React class components, and React hooks, with milestones.", "tier": "complex"}
+{"prompt": "Propose a 90-day plan to reduce P95 API latency from 800ms to 200ms, including concrete experiments, owners, and risks.", "tier": "complex"}
+{"prompt": "Critique the choice to roll your own auth system in 2026 versus using Auth0/Clerk/Supabase, with quantitative risk framing.", "tier": "complex"}
+{"prompt": "Design a load testing strategy for a checkout flow that integrates with 3 third-party APIs, accounting for sandbox limits and fault injection.", "tier": "complex"}
+{"prompt": "Predict the operational impact of moving from per-request Lambda to provisioned-concurrency Lambda for a spiky traffic pattern, and recommend tuning.", "tier": "complex"}
+{"prompt": "Synthesize the pros and cons of monolithic vs modular CSS architectures for a design system used by 20 product teams, with migration sequencing.", "tier": "complex"}
+{"prompt": "Reason about whether to ship a new feature behind a flag with 1% rollout or run a private beta first, given current change-failure rate and team capacity.", "tier": "complex"}
+{"prompt": "Critique a proposed schema migration that adds a NOT NULL column with a default to a 200M-row table, listing concrete operational risks and safer alternatives.", "tier": "complex"}
+{"prompt": "Argue both sides of whether engineering managers should still write production code, accounting for team size, seniority distribution, and incident load.", "tier": "complex"}
+{"prompt": "Compare the architectural implications of single-tenant vs multi-tenant deployments for a regulated healthcare SaaS, with cost and compliance trade-offs.", "tier": "complex"}
+{"prompt": "Derive a queue-based backpressure strategy for an async image processing pipeline that occasionally sees 10x traffic spikes.", "tier": "complex"}
+{"prompt": "Predict three ways an AI-powered code review tool could degrade engineering culture and propose product mitigations for each.", "tier": "complex"}
+{"prompt": "Synthesize a strategy for managing technical debt at a 5-year-old startup that has just hit product-market fit and is doubling headcount.", "tier": "complex"}
+{"prompt": "Reason through whether to use a feature store, raw warehouse queries, or in-app caching for a real-time recommendation system, including latency and freshness trade-offs.", "tier": "complex"}
+{"prompt": "Justify a choice between blue-green and canary deployments for a payment processing service with strict rollback SLAs.", "tier": "complex"}
+{"prompt": "Analyze why a service-level objective of 99.95% availability may be insufficient for a B2B billing API and propose a path to 99.99%.", "tier": "complex"}
+{"prompt": "Design an incident escalation policy for a 24/7 SaaS with engineers across 3 timezones, balancing burnout, response time, and ownership clarity.", "tier": "complex"}
+{"prompt": "Critique a proposal to replace all internal microservices with a single GraphQL gateway and recommend a more gradual approach.", "tier": "complex"}
+{"prompt": "Argue for or against building an internal data platform versus standardizing on a vendor (e.g., Databricks, Snowflake, BigQuery) for a 30-engineer data org.", "tier": "complex"}
+{"prompt": "Compare the long-term costs of a serverless-first vs container-first stack for a B2B SaaS doing $5M ARR with predictable traffic.", "tier": "complex"}
+{"prompt": "Derive an A/B test power-analysis plan for a checkout button color change, given 50k weekly visitors and a baseline 4% conversion rate.", "tier": "complex"}
+{"prompt": "Predict 3 second-order effects of removing a quarterly performance review process and replacing it with continuous feedback.", "tier": "complex"}
+{"prompt": "Synthesize a strategy for handling AI hallucinations in a customer-facing support chatbot, balancing helpfulness with safety.", "tier": "complex"}
+{"prompt": "Reason about whether to deprecate a v1 API used by 12 paying customers when v2 has been stable for 18 months, including migration incentives.", "tier": "complex"}
+{"prompt": "Justify the choice of memory model (CRDT vs OT vs lock-based) for a real-time collaborative whiteboard with 50 concurrent users per board.", "tier": "complex"}
+{"prompt": "Analyze the trade-offs between server-side rendering, static generation, and client-side rendering for a content site with 10k pages and weekly updates.", "tier": "complex"}
+{"prompt": "Design a permissions migration plan from a flat ACL model to RBAC for a SaaS with 50k existing tenants without downtime.", "tier": "complex"}
+{"prompt": "Critique the following monitoring setup: 'we alert on every 5xx error to PagerDuty.' Identify failure modes and propose a tiered alerting model.", "tier": "complex"}
+{"prompt": "Argue both sides of investing in developer experience tooling (IDE plugins, internal CLIs) versus shipping more customer-facing features.", "tier": "complex"}
+{"prompt": "Compare the operational maturity required for self-hosted Kubernetes vs managed EKS for a team of 4 platform engineers.", "tier": "complex"}
+{"prompt": "Derive a multi-step debugging plan for intermittent 502 errors that occur only during peak traffic on a single availability zone.", "tier": "complex"}
+{"prompt": "Predict the impact of switching from synchronous webhooks to async event delivery on integration partner reliability and propose a migration path.", "tier": "complex"}
+{"prompt": "Synthesize a SOC 2 readiness plan for a 25-person Series A startup, prioritizing controls by risk and time-to-implement.", "tier": "complex"}
+{"prompt": "Reason through whether to acquire a small competitor or build the equivalent feature in-house, including cultural and technical integration risks.", "tier": "complex"}
+{"prompt": "Justify the design choice of an append-only event log as the source of truth for a financial reconciliation service.", "tier": "complex"}
+{"prompt": "Analyze how to evolve a public REST API without breaking 200+ external integrations, including deprecation policy and version sunset timing.", "tier": "complex"}
+{"prompt": "Design an end-to-end testing strategy for a checkout flow spanning 4 microservices, a third-party payment processor, and an email delivery vendor.", "tier": "complex"}
+{"prompt": "Critique a roadmap that allocates 80 percent of engineering time to new features and 20 percent to reliability, given the team had 3 P1 incidents last quarter.", "tier": "complex"}
+{"prompt": "Argue for or against a 4-day work week for a 15-person engineering team shipping weekly releases, with concrete operational adjustments.", "tier": "complex"}
+{"prompt": "Compare the trade-offs between row-level security in Postgres and application-layer authorization for a multi-tenant analytics product.", "tier": "complex"}
