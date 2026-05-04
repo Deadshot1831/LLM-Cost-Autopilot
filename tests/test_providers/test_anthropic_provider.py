@@ -1,5 +1,12 @@
+import pytest
+
 from autopilot.models import ComplexityTier, ModelConfig
 from autopilot.providers.anthropic_provider import AnthropicProvider
+
+
+@pytest.fixture(autouse=True)
+def _force_mock(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
 
 def _cfg() -> ModelConfig:

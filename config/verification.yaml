@@ -1,0 +1,29 @@
+# Reference model used to verify cheap-model responses.
+# Must exist in config/models.yaml.
+reference_model: gpt-4o
+
+# Judge prompt template - used when the prompt is long (> 30 tokens).
+# {prompt}, {candidate}, {reference} are substituted.
+judge_prompt: |
+  You are evaluating two responses to the same user prompt.
+  PROMPT:
+  {prompt}
+
+  RESPONSE A (under evaluation):
+  {candidate}
+
+  RESPONSE B (reference, treated as ground truth):
+  {reference}
+
+  Score how well RESPONSE A matches RESPONSE B in factual content,
+  completeness, and helpfulness on a 1-5 scale where:
+  - 5: equivalent quality and content
+  - 4: minor differences, both acceptable
+  - 3: noticeable gap but A is still useful
+  - 2: A misses key information from B
+  - 1: A is wrong or unusable
+
+  Respond with ONLY a single integer 1-5.
+
+# Sampling rate - 1.0 verifies every response, 0.1 verifies 10%.
+sample_rate: 1.0
