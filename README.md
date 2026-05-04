@@ -4,9 +4,9 @@ Routes LLM requests to the cheapest model that can handle them at acceptable qua
 
 ## Status
 
-- [x] **Phase 1**: Unified model interface (OpenAI + mocked Anthropic/Ollama)
+- [x] **Phase 1**: Unified model interface (OpenAI + Anthropic + mocked Ollama)
 - [x] **Phase 2**: Complexity classifier + tier-to-model routing (92.9% test accuracy)
-- [ ] Phase 3: Async quality verification
+- [x] **Phase 3**: Async quality verification + auto-escalation + retrain feedback loop
 - [ ] Phase 4: Logging + dashboard
 - [ ] Phase 5: FastAPI service
 - [ ] Phase 6: Portfolio polish
@@ -15,8 +15,8 @@ Routes LLM requests to the cheapest model that can handle them at acceptable qua
 
 ```bash
 uv sync
-cp .env.example .env                      # add OPENAI_API_KEY
-uv run python scripts/train_classifier.py # produces models/classifier.joblib
+cp .env.example .env                       # add OPENAI_API_KEY (and ANTHROPIC_API_KEY if you have one)
+uv run python scripts/train_classifier.py  # produces models/classifier.joblib
 ```
 
 ## Usage
@@ -53,14 +53,34 @@ print(result.tier, result.response.model_id, result.response.cost)
 print(result.routing_reason)
 ```
 
+### Verifying router (Phase 3)
+
+```python
+import asyncio
+from autopilot.verifier import Verifier
+from autopilot.verifying_router import VerifyingRouter
+
+verifier = Verifier(reference_cfg=registry.get("gpt-4o"))
+vr = VerifyingRouter(
+    base_router=router,
+    verifier=verifier,
+    failure_log_path="data/routing_failures.jsonl",
+)
+result = asyncio.run(vr.route_request("Summarize this article."))
+print(result.final_response.text)
+print(result.escalation.escalated, result.escalation.reason)
+```
+
 ## Tests + Scripts
 
 ```bash
-uv run pytest                              # unit tests, no API calls (59 tests)
-uv run pytest -m integration               # real OpenAI smoke test (needs OPENAI_API_KEY)
-uv run python scripts/run_baseline.py      # cost/latency comparison across providers
-uv run python scripts/train_classifier.py  # train + persist the complexity classifier
-uv run python scripts/evaluate_routing.py  # end-to-end routing demo (needs OPENAI_API_KEY)
+uv run pytest                                  # unit tests, no API calls (88 tests)
+uv run pytest -m integration                   # real OpenAI smoke test (needs OPENAI_API_KEY)
+uv run python scripts/run_baseline.py          # cost/latency comparison across providers
+uv run python scripts/train_classifier.py      # train + persist the complexity classifier
+uv run python scripts/evaluate_routing.py      # end-to-end routing demo (needs OPENAI_API_KEY)
+uv run python scripts/run_verification_demo.py # routed + verified + savings table
+uv run python scripts/retrain_from_failures.py # promote failed prompts and retrain
 ```
 
 ## Architecture
@@ -68,7 +88,7 @@ uv run python scripts/evaluate_routing.py  # end-to-end routing demo (needs OPEN
 **Phase 1 (unified interface)**
 - `src/autopilot/models.py` — `ModelConfig`, `Response`, `ComplexityTier` dataclasses
 - `src/autopilot/registry.py` — YAML-backed model registry (`config/models.yaml`)
-- `src/autopilot/providers/` — one file per provider, all implementing the `Provider` protocol
+- `src/autopilot/providers/` — one file per provider, all implementing the `Provider` protocol. OpenAI and Anthropic use real SDKs when their API keys are set; Ollama is mocked
 - `src/autopilot/client.py` — `send_request(prompt, config)` dispatcher
 
 **Phase 2 (classifier + routing)**
@@ -78,6 +98,10 @@ uv run python scripts/evaluate_routing.py  # end-to-end routing demo (needs OPEN
 - `src/autopilot/routing.py` — tier-to-model map (`config/routing.yaml`)
 - `src/autopilot/router.py` — `Router.route_request(prompt)` glues classifier + routing + `send_request` into a `RoutedResponse`
 
-Anthropic and Ollama providers are deterministic mocks for Phase 1; they are
-swapped for real implementations in later phases (Anthropic in Phase 3 when
-the verifier needs a second opinion; Ollama whenever the local model is set up).
+**Phase 3 (verification + escalation)**
+- `src/autopilot/quality.py` — `QualityVerdict`, `VerdictResult`, exact-match (Jaccard) scoring
+- `src/autopilot/verifier.py` — `Verifier` calls the reference model and scores agreement (exact-match for short prompts, LLM-as-judge for long prompts)
+- `src/autopilot/escalation.py` — `escalate_on_fail` (swap candidate for reference) + `log_failure` (append to JSONL)
+- `src/autopilot/verifying_router.py` — `VerifyingRouter` wraps a base `Router` with verify + escalate + log
+- `config/verification.yaml` — reference model id, judge prompt template, sample rate
+- `data/routing_failures.jsonl` — append-only log; `scripts/retrain_from_failures.py` consumes it
