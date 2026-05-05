@@ -7,7 +7,7 @@ Routes LLM requests to the cheapest model that can handle them at acceptable qua
 - [x] **Phase 1**: Unified model interface (OpenAI + Anthropic + mocked Ollama)
 - [x] **Phase 2**: Complexity classifier + tier-to-model routing (92.9% test accuracy)
 - [x] **Phase 3**: Async quality verification + auto-escalation + retrain feedback loop
-- [ ] Phase 4: Logging + dashboard
+- [x] **Phase 4**: SQLite logging + Streamlit cost dashboard
 - [ ] Phase 5: FastAPI service
 - [ ] Phase 6: Portfolio polish
 
@@ -71,16 +71,32 @@ print(result.final_response.text)
 print(result.escalation.escalated, result.escalation.reason)
 ```
 
+### Logging + dashboard (Phase 4)
+
+```python
+import asyncio
+from autopilot.db import open_db
+from autopilot.logging_router import LoggingRouter
+
+conn = open_db("data/autopilot.db")
+lr = LoggingRouter(verifying_router=vr, conn=conn)
+asyncio.run(lr.route_request("Summarize this article."))
+# then in another shell:
+#   ./scripts/run_dashboard.sh
+```
+
 ## Tests + Scripts
 
 ```bash
-uv run pytest                                  # unit tests, no API calls (88 tests)
+uv run pytest                                  # unit tests, no API calls (98 tests)
 uv run pytest -m integration                   # real OpenAI smoke test (needs OPENAI_API_KEY)
 uv run python scripts/run_baseline.py          # cost/latency comparison across providers
 uv run python scripts/train_classifier.py      # train + persist the complexity classifier
 uv run python scripts/evaluate_routing.py      # end-to-end routing demo (needs OPENAI_API_KEY)
 uv run python scripts/run_verification_demo.py # routed + verified + savings table
 uv run python scripts/retrain_from_failures.py # promote failed prompts and retrain
+uv run python scripts/load_test.py -n 30       # populate the dashboard database
+./scripts/run_dashboard.sh                     # launch Streamlit dashboard
 ```
 
 ## Architecture
@@ -105,3 +121,10 @@ uv run python scripts/retrain_from_failures.py # promote failed prompts and retr
 - `src/autopilot/verifying_router.py` — `VerifyingRouter` wraps a base `Router` with verify + escalate + log
 - `config/verification.yaml` — reference model id, judge prompt template, sample rate
 - `data/routing_failures.jsonl` — append-only log; `scripts/retrain_from_failures.py` consumes it
+
+**Phase 4 (logging + dashboard)**
+- `src/autopilot/db.py` — SQLite schema, `RequestRecord`, insert/query helpers
+- `src/autopilot/logging_router.py` — `LoggingRouter` wraps `VerifyingRouter` and persists every request
+- `dashboard/app.py` — Streamlit page: cost-savings headline + routing/verdict/escalation charts + recent-requests table
+- `scripts/load_test.py` — populates `data/autopilot.db` with N seeded prompts so the dashboard has data
+- `scripts/run_dashboard.sh` — `uv run streamlit run dashboard/app.py`
