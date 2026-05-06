@@ -1,0 +1,14 @@
+.venv/
+.env
+.git/
+.pytest_cache/
+.coverage
+htmlcov/
+__pycache__/
+*.pyc
+*.pyo
+data/autopilot.db
+data/routing_failures.jsonl
+docs/
+dashboard/
+.DS_Store
