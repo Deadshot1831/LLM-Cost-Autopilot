@@ -52,7 +52,11 @@ class RequestRecord:
 def open_db(path: Path | str) -> sqlite3.Connection:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(path))
+    # check_same_thread=False so the FastAPI TestClient (and the real ASGI
+    # server, which dispatches sync handlers to a worker thread) can use the
+    # same connection. SQLite itself serializes writes; we have no concurrent
+    # writers at the scale of a single-process autopilot service.
+    conn = sqlite3.connect(str(path), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
     conn.commit()
