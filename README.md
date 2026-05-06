@@ -8,7 +8,7 @@ Routes LLM requests to the cheapest model that can handle them at acceptable qua
 - [x] **Phase 2**: Complexity classifier + tier-to-model routing (92.9% test accuracy)
 - [x] **Phase 3**: Async quality verification + auto-escalation + retrain feedback loop
 - [x] **Phase 4**: SQLite logging + Streamlit cost dashboard
-- [ ] Phase 5: FastAPI service
+- [x] **Phase 5**: FastAPI service + docker-compose
 - [ ] Phase 6: Portfolio polish
 
 ## Setup
@@ -85,10 +85,44 @@ asyncio.run(lr.route_request("Summarize this article."))
 #   ./scripts/run_dashboard.sh
 ```
 
+### API service (Phase 5)
+
+Run the API locally:
+
+```bash
+uv run python scripts/train_classifier.py
+uv run uvicorn autopilot.api.main:app --reload
+```
+
+Or with docker-compose (image bakes in the trained classifier):
+
+```bash
+cp .env.example .env  # add your keys
+docker compose up --build
+```
+
+Hit it:
+
+```bash
+curl -X POST http://localhost:8000/v1/completions \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "What is 2 + 2?"}'
+
+curl http://localhost:8000/v1/stats
+curl http://localhost:8000/v1/models
+curl http://localhost:8000/v1/routing-config
+
+curl -X PUT http://localhost:8000/v1/routing-config \
+  -H "Content-Type: application/json" \
+  -d '{"simple": "gpt-4o-mini", "moderate": "gpt-4o-mini", "complex": "gpt-4o"}'
+```
+
+OpenAPI docs auto-generated at `http://localhost:8000/docs`.
+
 ## Tests + Scripts
 
 ```bash
-uv run pytest                                  # unit tests, no API calls (98 tests)
+uv run pytest                                  # unit tests, no API calls (109 tests)
 uv run pytest -m integration                   # real OpenAI smoke test (needs OPENAI_API_KEY)
 uv run python scripts/run_baseline.py          # cost/latency comparison across providers
 uv run python scripts/train_classifier.py      # train + persist the complexity classifier
@@ -97,6 +131,7 @@ uv run python scripts/run_verification_demo.py # routed + verified + savings tab
 uv run python scripts/retrain_from_failures.py # promote failed prompts and retrain
 uv run python scripts/load_test.py -n 30       # populate the dashboard database
 ./scripts/run_dashboard.sh                     # launch Streamlit dashboard
+uv run uvicorn autopilot.api.main:app --reload # launch the API service
 ```
 
 ## Architecture
@@ -128,3 +163,11 @@ uv run python scripts/load_test.py -n 30       # populate the dashboard database
 - `dashboard/app.py` — Streamlit page: cost-savings headline + routing/verdict/escalation charts + recent-requests table
 - `scripts/load_test.py` — populates `data/autopilot.db` with N seeded prompts so the dashboard has data
 - `scripts/run_dashboard.sh` — `uv run streamlit run dashboard/app.py`
+
+**Phase 5 (API service)**
+- `src/autopilot/api/schemas.py` — Pydantic request/response models
+- `src/autopilot/api/state.py` — `AppState` bundles registry/classifier/routing/verifier/db_conn/logging_router; `update_routing()` rewrites `config/routing.yaml`
+- `src/autopilot/api/app.py` — `create_app(state)` factory + 6 endpoints (`/health`, `/v1/completions`, `/v1/models`, `/v1/stats`, `GET/PUT /v1/routing-config`)
+- `src/autopilot/api/main.py` — uvicorn entry point
+- `Dockerfile` — `python:3.11-slim` + `uv` + classifier baked in at build time
+- `docker-compose.yml` — single API service with the `data/` volume mounted for SQLite persistence
