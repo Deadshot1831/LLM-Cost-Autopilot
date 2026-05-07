@@ -2,6 +2,14 @@
 
 Routes LLM requests to the cheapest model that can handle them at acceptable quality.
 
+> **41.5% cost reduction across 500 simulated requests** while maintaining
+> verified quality parity (auto-escalates the 11.8% of cases where a cheap
+> model's answer disagrees with the reference). Full case study:
+> [docs/case-study/CASE_STUDY.md](docs/case-study/CASE_STUDY.md) ·
+> auto-generated report: [docs/case-study/REPORT.md](docs/case-study/REPORT.md).
+
+![Dashboard overview](docs/case-study/screenshots/dashboard-overview.png)
+
 ## Status
 
 - [x] **Phase 1**: Unified model interface (OpenAI + Anthropic + mocked Ollama)
@@ -9,7 +17,7 @@ Routes LLM requests to the cheapest model that can handle them at acceptable qua
 - [x] **Phase 3**: Async quality verification + auto-escalation + retrain feedback loop
 - [x] **Phase 4**: SQLite logging + Streamlit cost dashboard
 - [x] **Phase 5**: FastAPI service + docker-compose
-- [ ] Phase 6: Portfolio polish
+- [x] **Phase 6**: Portfolio polish — case study, simulated 500-request load test, auto-generated cost report
 
 ## Setup
 
@@ -130,6 +138,8 @@ uv run python scripts/evaluate_routing.py      # end-to-end routing demo (needs 
 uv run python scripts/run_verification_demo.py # routed + verified + savings table
 uv run python scripts/retrain_from_failures.py # promote failed prompts and retrain
 uv run python scripts/load_test.py -n 30       # populate the dashboard database
+uv run python scripts/simulate_load.py -n 500  # simulated load (no real API calls)
+uv run python scripts/generate_report.py       # write docs/case-study/REPORT.md
 ./scripts/run_dashboard.sh                     # launch Streamlit dashboard
 uv run uvicorn autopilot.api.main:app --reload # launch the API service
 ```
@@ -171,3 +181,9 @@ uv run uvicorn autopilot.api.main:app --reload # launch the API service
 - `src/autopilot/api/main.py` — uvicorn entry point
 - `Dockerfile` — `python:3.11-slim` + `uv` + classifier baked in at build time
 - `docker-compose.yml` — single API service with the `data/` volume mounted for SQLite persistence
+
+**Phase 6 (portfolio polish)**
+- `scripts/simulate_load.py` — runs N prompts through the full pipeline with a mocked `send_request`; costs computed from real registry pricing so the savings number is faithful (no real API credits burned)
+- `scripts/generate_report.py` — reads `data/autopilot.db` and writes [docs/case-study/REPORT.md](docs/case-study/REPORT.md)
+- [docs/case-study/CASE_STUDY.md](docs/case-study/CASE_STUDY.md) — the portfolio case study
+- `docs/case-study/screenshots/` — drop-zone for dashboard screenshots (see the README inside for the naming convention)
