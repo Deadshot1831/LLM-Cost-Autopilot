@@ -1,7 +1,4 @@
-# Maps complexity tier to the model_id that should handle it.
-# model_ids must exist in config/models.yaml.
-# Edit and reload at runtime - no code change needed.
 routing:
-  simple: gpt-4o-mini      # cheapest non-mock real model
-  moderate: gpt-4o-mini    # bump to claude-haiku-4-5 once Anthropic provider is real (Phase 3)
-  complex: gpt-4o          # highest-quality model in the registry
+  simple: gpt-4o-mini
+  moderate: gpt-4o-mini
+  complex: gpt-4o
