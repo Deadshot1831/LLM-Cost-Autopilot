@@ -10,10 +10,11 @@ COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
 RUN uv sync --frozen --no-dev
 
-# Add config + dataset + scripts
+# Add config + dataset + scripts + chat UI
 COPY config ./config
 COPY data/prompts_labeled.jsonl ./data/prompts_labeled.jsonl
 COPY scripts ./scripts
+COPY static ./static
 
 # Train the classifier at build time so the image is self-contained
 RUN uv run python scripts/train_classifier.py

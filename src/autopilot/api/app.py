@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from autopilot.api.schemas import (
     CompletionMeta,
@@ -17,10 +21,20 @@ from autopilot.db import query_aggregate_costs
 from autopilot.models import ComplexityTier
 from autopilot.registry import ModelNotFoundError
 
+STATIC_DIR = Path(__file__).resolve().parent.parent.parent.parent / "static"
+
 
 def create_app(state: AppState) -> FastAPI:
     app = FastAPI(title="LLM Cost Autopilot", version="0.1.0")
     app.state.autopilot = state
+
+    # Mount the chat UI: GET / serves the SPA; /static/* serves any additional assets.
+    if STATIC_DIR.is_dir():
+        app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+        @app.get("/", include_in_schema=False)
+        def chat_ui() -> FileResponse:
+            return FileResponse(str(STATIC_DIR / "index.html"))
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -29,7 +43,17 @@ def create_app(state: AppState) -> FastAPI:
     @app.post("/v1/completions", response_model=CompletionResponse)
     async def completions(req: CompletionRequest) -> CompletionResponse:
         s: AppState = app.state.autopilot
-        result = await s.logging_router.route_request(req.prompt)
+        try:
+            result = await s.logging_router.route_request(req.prompt)
+        except ValueError as e:
+            # OpenAIProvider raises ValueError when OPENAI_API_KEY is missing.
+            # Surface a clean 503 so the chat UI can show a helpful message.
+            if "api key" in str(e).lower():
+                raise HTTPException(
+                    status_code=503,
+                    detail="OPENAI_API_KEY not configured on the server. Add it to .env and restart.",
+                )
+            raise
         return CompletionResponse(
             text=result.final_response.text,
             meta=CompletionMeta(
