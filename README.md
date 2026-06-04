@@ -7,7 +7,7 @@
 > Full case study: [docs/case-study/CASE_STUDY.md](docs/case-study/CASE_STUDY.md)
 > · auto-generated report: [docs/case-study/REPORT.md](docs/case-study/REPORT.md)
 
-![Dashboard overview](docs/case-study/screenshots/dashboard-overview.png)
+![Chat UI showing a simple prompt routed to gpt-4o-mini (cost $0.000006) next to a complex prompt routed to gpt-4o (cost $0.001485) — same UX, ~250× cost spread](docs/case-study/screenshots/chat-conversation-desktop.png)
 
 ---
 

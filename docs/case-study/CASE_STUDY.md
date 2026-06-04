@@ -20,7 +20,9 @@ agrees with what the expensive model would have said. On disagreement,
 the request auto-escalates and the failure becomes a training example
 for the classifier.
 
-![Dashboard overview](screenshots/dashboard-overview.png)
+![Chat UI showing a simple prompt routed to gpt-4o-mini (cost $0.000006) next to a complex prompt routed to gpt-4o (cost $0.001485)](screenshots/chat-conversation-desktop.png)
+
+The user-facing chat UI: every reply shows the routing decision (tier, model, cost, latency, verdict) under it. The contrast between "simple → gpt-4o-mini at $0.000006" and "complex → gpt-4o at $0.001485" is the whole product visualized in one screen.
 
 ## Architecture
 
