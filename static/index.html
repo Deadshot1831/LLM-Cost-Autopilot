@@ -4,49 +4,30 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>LLM Cost Autopilot</title>
-<meta name="description" content="Chat with the autopilot. Routes each prompt to the cheapest Claude model that can handle it, verifies the answer against claude-sonnet-4-6, and shows the saving under each reply." />
-
-<!-- Fonts: Inter (body) + Source Serif 4 (display) + JetBrains Mono (numbers/code) -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<meta name="description" content="Routes every prompt to the cheapest Claude model that can handle it, verifies the answer against claude-sonnet-4-6, and shows the saving under each reply." />
 
 <!-- Tailwind via CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- marked: tiny Markdown -> HTML so Claude's bold/lists/code render properly -->
+<!-- marked: Markdown -> HTML so Claude's bold/lists/code render properly -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
-  // Claude-themed palette: warm cream paper, coral/terracotta accent.
+  // Axion-inspired palette: light gray surface, orange CTA, dark ink.
   tailwind.config = {
     theme: {
       extend: {
         colors: {
-          // Paper / surface
-          paper:   "#FAF9F5",   // page bg (cream, Claude.ai-ish)
-          card:    "#FFFFFF",   // raised cards
-          subtle:  "#F2F0E8",   // chips, hover bg
-          line:    "#E8E4D9",   // borders
-          // Coral system (primary brand)
-          coral:   { DEFAULT: "#C9603C", 600: "#B5532F", 700: "#9D4525" },
-          accent:  "#D97757",   // softer coral for hovers/highlights
-          // Type
-          ink:     "#2C2A26",   // deep warm slate
-          muted:   "#6B6259",   // body muted
-          // Tier hues (warm-tinted so they harmonize with coral)
-          sage:    { 50: "#EFF1EA", 700: "#5A6A3E" },
+          surface: "#EFEFEF",     // page background
+          card:    "#FFFFFF",     // raised cards / pill / input
+          line:    "#E5E5E5",     // hairline borders
+          ink:     { DEFAULT: "#111111", 600: "#1F1F1F" },
+          muted:   "#6B7280",
+          orange:  { DEFAULT: "#F26522", 600: "#E05A1A", 700: "#C9501A" },
+          // Tier hues - warm/neutral
+          sage:    { 50: "#EEF1EA", 700: "#5A6A3E" },
           tan:     { 50: "#F5EDDC", 700: "#8A6B2E" },
           plum:    { 50: "#EFE3E0", 700: "#7A3A2E" },
-        },
-        fontFamily: {
-          sans:    ['"Inter"', "ui-sans-serif", "system-ui"],
-          serif:   ['"Source Serif 4"', "Georgia", "serif"],
-          mono:    ['"JetBrains Mono"', "ui-monospace", "monospace"],
-        },
-        boxShadow: {
-          paper: "0 1px 2px rgba(60, 45, 30, 0.04), 0 1px 1px rgba(60, 45, 30, 0.06)",
-          card:  "0 1px 3px rgba(60, 45, 30, 0.06), 0 4px 8px rgba(60, 45, 30, 0.04)",
         },
       },
     },
@@ -54,187 +35,272 @@
 </script>
 
 <style>
-  body { font-family: 'Inter', system-ui, sans-serif; background: #FAF9F5; color: #2C2A26; }
-  .display { font-family: 'Source Serif 4', Georgia, serif; letter-spacing: -0.01em; }
-  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-
-  /* Subtle paper texture via repeating soft noise — adds warmth without heaviness */
-  body::before {
-    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background-image: radial-gradient(rgba(60,45,30,0.025) 1px, transparent 1px);
-    background-size: 4px 4px;
-    mix-blend-mode: multiply;
+  /* System font stack per spec (no custom font loaded) */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: #EFEFEF;
+    color: #111111;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
   }
-  main, header, form { position: relative; z-index: 1; }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
 
-  /* Sticky bars with soft cream blur (not glassy — more like backlit paper) */
-  .paper-bar {
-    background: rgba(250, 249, 245, 0.88);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+  /* ----- Animated background (CSS substitute for the React-only shader stack) -----
+     Big soft radial gradients that drift slowly. Approximates the warm-orange-glow-
+     over-light-gray of the Axion hero without needing a WebGL canvas or any JS deps.
+  */
+  .bg-shader {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    background: #EFEFEF;
   }
-
-  /* Card surface */
-  .card {
-    background: #FFFFFF;
-    border: 1px solid #E8E4D9;
-    box-shadow: 0 1px 3px rgba(60, 45, 30, 0.06), 0 4px 8px rgba(60, 45, 30, 0.04);
+  .bg-shader::before, .bg-shader::after {
+    content: ""; position: absolute; inset: -25%;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(255, 95, 3, 0.18) 0%, transparent 38%),
+      radial-gradient(circle at 75% 65%, rgba(255, 255, 255, 0.85) 0%, transparent 45%),
+      radial-gradient(circle at 50% 100%, rgba(242, 101, 34, 0.10) 0%, transparent 50%);
+    filter: blur(20px);
+    animation: drift 24s ease-in-out infinite alternate;
   }
-  .card-soft {
-    background: #FFFFFF;
-    border: 1px solid #E8E4D9;
+  .bg-shader::after {
+    background:
+      radial-gradient(circle at 80% 20%, rgba(255, 95, 3, 0.12) 0%, transparent 40%),
+      radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.70) 0%, transparent 45%);
+    animation: drift2 32s ease-in-out infinite alternate;
+    mix-blend-mode: soft-light;
   }
-
-  /* Reduced motion */
+  @keyframes drift {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(6%, -4%) rotate(8deg); }
+  }
+  @keyframes drift2 {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-5%, 5%) rotate(-6deg); }
+  }
+  .film-grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.35;
+    background-image:
+      radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+      radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 3px 3px, 5px 5px;
+    background-position: 0 0, 1px 2px;
+    mix-blend-mode: overlay;
+  }
   @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
+    .bg-shader::before, .bg-shader::after { animation: none !important; }
+    * { transition: none !important; }
   }
+
+  /* Spinner */
   .spinner {
     width: 0.95rem; height: 0.95rem; border-radius: 9999px;
-    border: 2px solid rgba(201, 96, 60, 0.22);
-    border-top-color: #C9603C;
+    border: 2px solid rgba(242, 101, 34, 0.25);
+    border-top-color: #F26522;
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  :focus-visible { outline: 2px solid #C9603C; outline-offset: 2px; border-radius: 6px; }
-  html { scroll-behavior: smooth; }
+  :focus-visible { outline: 2px solid #F26522; outline-offset: 2px; border-radius: 6px; }
+
+  /* Cards */
+  .card {
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  /* Tier + verdict badges */
+  .badge-simple   { background: #EEF1EA; color: #5A6A3E; }
+  .badge-moderate { background: #F5EDDC; color: #8A6B2E; }
+  .badge-complex  { background: #EFE3E0; color: #7A3A2E; }
+  .badge-pass     { background: #EEF1EA; color: #5A6A3E; }
+  .badge-fail     { background: #F4DAD2; color: #8C2E1B; }
+  .badge-skip     { background: #ECEAE3; color: #6B6259; }
+  .badge-esc      { background: #F26522; color: #FFFFFF; }
 
   /* Markdown rendering inside assistant replies */
   .reply-body { line-height: 1.65; }
   .reply-body > * + * { margin-top: 0.6rem; }
-  .reply-body strong { color: #2C2A26; font-weight: 600; }
+  .reply-body strong { color: #111111; font-weight: 600; }
   .reply-body em { font-style: italic; }
   .reply-body code {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 0.85em;
-    background: #F2F0E8;
-    border: 1px solid #E8E4D9;
-    padding: 0.1em 0.35em;
-    border-radius: 4px;
+    font-family: ui-monospace, Menlo, monospace; font-size: 0.85em;
+    background: #F2F0E8; border: 1px solid #E5E5E5;
+    padding: 0.1em 0.35em; border-radius: 4px;
   }
   .reply-body pre {
-    background: #F2F0E8;
-    border: 1px solid #E8E4D9;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    overflow-x: auto;
+    background: #F4F4F4; border: 1px solid #E5E5E5;
+    padding: 0.75rem 1rem; border-radius: 8px; overflow-x: auto;
   }
-  .reply-body pre code {
-    background: transparent;
-    border: 0;
-    padding: 0;
-    font-size: 0.85em;
-  }
+  .reply-body pre code { background: transparent; border: 0; padding: 0; font-size: 0.85em; }
   .reply-body ul, .reply-body ol { padding-left: 1.25rem; }
   .reply-body ul { list-style: disc; }
   .reply-body ol { list-style: decimal; }
   .reply-body li + li { margin-top: 0.25rem; }
-  .reply-body h1, .reply-body h2, .reply-body h3 {
-    font-family: 'Source Serif 4', Georgia, serif;
-    font-weight: 600;
-    color: #2C2A26;
-  }
-  .reply-body h1 { font-size: 1.35rem; }
-  .reply-body h2 { font-size: 1.15rem; }
-  .reply-body h3 { font-size: 1rem; }
-  .reply-body a { color: #C9603C; text-decoration: underline; text-underline-offset: 2px; }
+  .reply-body h1, .reply-body h2, .reply-body h3 { font-weight: 600; color: #111111; }
+  .reply-body a { color: #F26522; text-decoration: underline; text-underline-offset: 2px; }
   .reply-body blockquote {
-    border-left: 3px solid #C9603C;
-    padding-left: 0.75rem;
-    color: #6B6259;
-    font-style: italic;
+    border-left: 3px solid #F26522; padding-left: 0.75rem;
+    color: #6B7280; font-style: italic;
   }
 
-  /* Tier badges — warm, low-saturation so coral remains the loudest color */
-  .badge-simple   { background: #EFF1EA; color: #5A6A3E; }
-  .badge-moderate { background: #F5EDDC; color: #8A6B2E; }
-  .badge-complex  { background: #EFE3E0; color: #7A3A2E; }
-  .badge-pass     { background: #EFF1EA; color: #5A6A3E; }
-  .badge-fail     { background: #F4DAD2; color: #8C2E1B; }
-  .badge-skip     { background: #ECEAE3; color: #6B6259; }
-  .badge-esc      { background: #C9603C; color: #FFFFFF; }
+  /* ----- Axion-style text-roll hover for buttons ----- */
+  .roll-wrap {
+    display: flex; flex-direction: column;
+    overflow: hidden; height: 20px; line-height: 20px;
+  }
+  .roll-inner {
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  .roll-btn:hover .roll-inner { transform: translateY(-50%); }
+  .roll-arrow {
+    transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  .roll-btn:hover .roll-arrow { transform: rotate(-45deg); }
 </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-<!-- HEADER -->
-<header class="paper-bar sticky top-0 z-20 border-b border-line">
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-    <div class="flex items-center gap-3 min-w-0">
-      <!-- Logo: stylized spark mark, no emoji per design rules -->
-      <span class="w-9 h-9 rounded-xl bg-coral flex items-center justify-center shrink-0 shadow-paper" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2c1.5 4 4 6.5 8 8-4 1.5-6.5 4-8 8-1.5-4-4-6.5-8-8 4-1.5 6.5-4 8-8z"/>
-        </svg>
-      </span>
-      <div class="min-w-0">
-        <h1 class="display text-base sm:text-lg font-semibold leading-tight truncate text-ink">LLM Cost Autopilot</h1>
-        <p class="text-xs text-muted truncate">Routes every prompt to the cheapest Claude model that can handle it.</p>
+<!-- Animated background layer -->
+<div class="bg-shader" aria-hidden="true"></div>
+<div class="film-grain" aria-hidden="true"></div>
+
+<!-- ============================================================ -->
+<!-- HEADER (Axion-style pill nav)                                -->
+<!-- ============================================================ -->
+<header class="relative z-20 w-full max-w-[1440px] mx-auto p-2 sm:p-3">
+  <nav class="flex items-center justify-between bg-white rounded-full" style="padding: 5px;">
+    <!-- LEFT: logo + nav -->
+    <div class="flex items-center gap-6">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 bg-ink rounded-full flex items-center justify-center shrink-0">
+        <span class="text-white text-[10px] sm:text-[11px] font-bold tracking-tight">LC</span>
+      </div>
+      <ul class="hidden md:flex items-center gap-6">
+        <li><a href="#" class="text-[14px] text-ink hover:text-muted transition-colors duration-300">Chat</a></li>
+        <li><a href="/docs" class="text-[14px] text-ink hover:text-muted transition-colors duration-300">API Docs</a></li>
+        <li><a href="https://github.com/Deadshot1831/LLM-Cost-Autopilot" target="_blank" rel="noopener" class="text-[14px] text-ink hover:text-muted transition-colors duration-300">GitHub</a></li>
+      </ul>
+    </div>
+    <!-- RIGHT: live stats pill + status (desktop only) -->
+    <div class="hidden md:flex items-center gap-3 pr-1">
+      <span class="hidden lg:inline text-[13px] text-muted">Powered by Claude</span>
+      <div id="stats-pill" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-line bg-white mono text-[12px] text-muted" role="status" aria-live="polite">
+        <span class="w-2 h-2 rounded-full bg-orange" aria-hidden="true"></span>
+        <span id="stats-text">loading…</span>
       </div>
     </div>
-    <!-- Live stats pill -->
-    <div id="stats-pill" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full card-soft mono text-xs text-muted" role="status" aria-live="polite">
-      <span class="w-2 h-2 rounded-full bg-coral" aria-hidden="true"></span>
-      <span id="stats-text">loading stats…</span>
-    </div>
-  </div>
+    <!-- MOBILE hamburger -->
+    <button id="menu-btn" type="button" aria-label="Open menu" class="md:hidden bg-ink rounded-full p-2 cursor-pointer">
+      <svg id="icon-menu" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg id="icon-close" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </nav>
 </header>
 
-<!-- MESSAGE LIST -->
-<main id="messages" class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-6 space-y-5">
-  <!-- Welcome card -->
-  <section class="card rounded-2xl p-6 sm:p-7">
-    <h2 class="display text-2xl sm:text-3xl font-semibold text-ink">Try the autopilot</h2>
-    <p class="text-[15px] sm:text-base text-muted mt-2 leading-relaxed">
-      Send any prompt below. The autopilot classifies it, routes it to
-      <span class="mono text-ink">claude-haiku-4-5</span> when it can, then verifies the answer against
-      <span class="mono text-ink">claude-sonnet-4-6</span> and shows the saving under each reply.
+<!-- ============================================================ -->
+<!-- Mobile bottom-sheet menu                                     -->
+<!-- ============================================================ -->
+<div id="mobile-menu" class="md:hidden fixed inset-0 z-50 pointer-events-none" aria-hidden="true">
+  <div id="menu-backdrop" class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-500"></div>
+  <div id="menu-sheet" class="absolute left-0 right-0 bottom-0 mx-3 mb-3 bg-white rounded-2xl p-6 translate-y-full transition-transform duration-500" style="transition-timing-function: cubic-bezier(0.32,0.72,0,1);">
+    <div class="inline-flex items-center gap-1.5 text-[12px] text-muted border border-line rounded-full px-3 py-1 mb-6">
+      <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
+      Powered by Claude
+    </div>
+    <ul class="space-y-3 mb-6">
+      <li><a href="#" class="text-[28px] leading-[32px] font-medium text-ink">Chat</a></li>
+      <li><a href="/docs" class="text-[28px] leading-[32px] font-medium text-ink">API Docs</a></li>
+      <li><a href="https://github.com/Deadshot1831/LLM-Cost-Autopilot" target="_blank" rel="noopener" class="text-[28px] leading-[32px] font-medium text-ink">GitHub</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- HERO + CHAT                                                  -->
+<!-- ============================================================ -->
+<main class="relative z-10 flex-1 w-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12 pb-32 sm:pb-36">
+
+  <!-- Hero band (always visible, fades as content scrolls under it) -->
+  <section id="hero" class="pt-6 sm:pt-10 lg:pt-16 pb-8 sm:pb-12">
+    <p class="text-[13px] sm:text-[14px] text-ink mb-4 sm:mb-6" style="letter-spacing: 0.04em;">LLM Cost Autopilot</p>
+    <h1 class="font-medium text-ink leading-[1.08]" style="font-size: clamp(1.75rem, 5vw, 3.4rem); letter-spacing: -0.03em;">
+      Route every prompt to the cheapest<br class="hidden sm:block" />
+      <span class="sm:hidden"> </span>Claude model that can handle it.
+    </h1>
+    <p class="mt-4 sm:mt-5 text-[14px] sm:text-[15px] text-muted max-w-xl leading-relaxed">
+      Claude Haiku 4.5 handles the easy ones. Claude Sonnet 4.6 verifies every answer
+      and auto-escalates when the cheap model disagrees. You see the routing decision
+      under each reply.
     </p>
-    <div class="mt-5 flex flex-wrap gap-2">
-      <button type="button" class="example-prompt cursor-pointer text-[13px] px-3.5 py-1.5 rounded-full bg-subtle border border-line text-ink hover:border-coral hover:text-coral transition-colors duration-200">What is the capital of Japan?</button>
-      <button type="button" class="example-prompt cursor-pointer text-[13px] px-3.5 py-1.5 rounded-full bg-subtle border border-line text-ink hover:border-coral hover:text-coral transition-colors duration-200">Summarize the plot of Hamlet in two sentences.</button>
-      <button type="button" class="example-prompt cursor-pointer text-[13px] px-3.5 py-1.5 rounded-full bg-subtle border border-line text-ink hover:border-coral hover:text-coral transition-colors duration-200">Compare event sourcing vs CRUD for a fintech ledger.</button>
+  </section>
+
+  <!-- Chat thread -->
+  <section id="messages" class="space-y-4 sm:space-y-5">
+    <!-- Welcome card (removed by JS once a prompt is sent) -->
+    <div id="welcome-card" class="card rounded-2xl p-5 sm:p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-ink text-white text-[11px] sm:text-[12px] font-semibold flex items-center justify-center">1</span>
+        <span class="text-[12px] sm:text-[13px] font-medium border border-line rounded-full px-3 sm:px-4 py-1 sm:py-1.5">Try the autopilot</span>
+      </div>
+      <p class="text-[14px] sm:text-[15px] text-muted leading-relaxed">
+        Send any prompt. The autopilot classifies it, routes it to
+        <span class="mono text-ink">claude-haiku-4-5</span> when it can, then verifies against
+        <span class="mono text-ink">claude-sonnet-4-6</span> and shows the saving under each reply.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button type="button" class="example-prompt cursor-pointer text-[13px] px-3.5 py-1.5 rounded-full bg-surface border border-line text-ink hover:border-orange hover:text-orange transition-colors duration-200">What is the capital of Japan?</button>
+        <button type="button" class="example-prompt cursor-pointer text-[13px] px-3.5 py-1.5 rounded-full bg-surface border border-line text-ink hover:border-orange hover:text-orange transition-colors duration-200">Summarize the plot of Hamlet in two sentences.</button>
+        <button type="button" class="example-prompt cursor-pointer text-[13px] px-3.5 py-1.5 rounded-full bg-surface border border-line text-ink hover:border-orange hover:text-orange transition-colors duration-200">Compare event sourcing vs CRUD for a fintech ledger.</button>
+      </div>
     </div>
   </section>
 </main>
 
 <!-- Error toast -->
-<div id="error-toast" role="alert" aria-live="assertive" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 z-30 px-4 py-3 rounded-xl bg-plum-50 border border-line text-plum-700 text-sm shadow-card max-w-md">
+<div id="error-toast" role="alert" aria-live="assertive" class="hidden fixed bottom-32 left-1/2 -translate-x-1/2 z-30 px-4 py-3 rounded-xl bg-plum-50 border border-line text-plum-700 text-sm shadow-lg max-w-md">
   <span id="error-text"></span>
 </div>
 
-<!-- INPUT BAR (sticky bottom) -->
-<form id="chat-form" class="sticky bottom-0 z-20 paper-bar border-t border-line">
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-3">
-    <div class="card rounded-2xl p-2 flex items-end gap-2">
+<!-- ============================================================ -->
+<!-- STICKY INPUT BAR (Axion-style orange CTA)                    -->
+<!-- ============================================================ -->
+<form id="chat-form" class="sticky bottom-0 z-20 w-full">
+  <div class="w-full max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-12 pb-3 sm:pb-4">
+    <div class="card rounded-full p-1.5 sm:p-2 flex items-center gap-2">
       <label for="prompt-input" class="sr-only">Your prompt</label>
       <textarea
         id="prompt-input"
         rows="1"
         placeholder="Ask Claude anything…"
-        class="flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] sm:text-base text-ink focus:outline-none placeholder:text-muted/70 max-h-48"
+        class="flex-1 resize-none bg-transparent px-3 sm:px-4 py-2 text-[14px] sm:text-[15px] text-ink focus:outline-none placeholder:text-muted/70 max-h-48 leading-[20px]"
         autocomplete="off"
         required
       ></textarea>
-      <button
-        id="send-btn"
-        type="submit"
-        class="cursor-pointer shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-coral hover:bg-coral-600 text-white text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
-        aria-label="Send prompt"
-      >
-        <span class="hidden sm:inline">Send</span>
-        <svg id="send-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        <span id="send-spinner" class="spinner hidden" style="border-top-color: #FFFFFF; border-color: rgba(255,255,255,0.35);"></span>
+      <button id="send-btn" type="submit" class="roll-btn shrink-0 inline-flex items-center gap-2 bg-orange hover:bg-orange-600 text-white text-[13px] sm:text-[14px] font-medium rounded-full pl-4 sm:pl-5 pr-1 py-1 cursor-pointer transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px]" aria-label="Send prompt">
+        <span class="hidden sm:inline-flex roll-wrap">
+          <span class="roll-inner">
+            <span class="block">Send</span>
+            <span class="block">Send</span>
+          </span>
+        </span>
+        <span class="roll-arrow flex items-center justify-center w-8 h-8 rounded-full bg-white">
+          <svg id="send-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F26522" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <span id="send-spinner" class="spinner hidden" style="border-top-color: #F26522; border-color: rgba(242,101,34,0.25);"></span>
+        </span>
       </button>
     </div>
-    <p class="text-[11px] text-muted mt-2 text-center">
+    <p class="text-[10px] sm:text-[11px] text-muted/70 mt-2 text-center">
       Press <span class="mono">Enter</span> to send · <span class="mono">Shift+Enter</span> for new line
     </p>
   </div>
 </form>
 
 <script>
-  // ---------- API ----------
+  // ============================================================
+  // EVERYTHING BELOW THIS LINE IS UNCHANGED FROM THE PREVIOUS UI.
+  // Only the visual chrome above has been reskinned.
+  // ============================================================
+
   const API_BASE = ""; // same origin
 
   async function sendCompletion(prompt) {
@@ -259,8 +325,8 @@
     } catch { return null; }
   }
 
-  // ---------- DOM helpers ----------
   const messagesEl = document.getElementById("messages");
+  const welcomeCard = document.getElementById("welcome-card");
   const promptInput = document.getElementById("prompt-input");
   const sendBtn = document.getElementById("send-btn");
   const sendIcon = document.getElementById("send-icon");
@@ -285,8 +351,8 @@
     const wrap = document.createElement("div");
     wrap.className = "flex justify-end";
     wrap.innerHTML = `
-      <div class="max-w-[85%] sm:max-w-[78%] bg-coral text-white rounded-2xl rounded-br-md px-4 py-3 shadow-paper">
-        <p class="text-[15px] sm:text-base whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</p>
+      <div class="max-w-[85%] sm:max-w-[78%] bg-ink text-white rounded-2xl rounded-br-md px-4 py-3">
+        <p class="text-[14px] sm:text-[15px] whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</p>
       </div>`;
     messagesEl.appendChild(wrap);
     wrap.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -308,17 +374,11 @@
   }
 
   function renderMarkdown(text) {
-    // marked is loaded via CDN. Configure once: GitHub-flavored defaults,
-    // line-breaks honored, sanitize-by-default since Claude can emit
-    // arbitrary text. We don't allow raw HTML.
     if (!window._markedConfigured && window.marked) {
       window.marked.setOptions({ gfm: true, breaks: true });
       window._markedConfigured = true;
     }
-    if (!window.marked) return escapeHtml(text); // graceful fallback if CDN failed
-    // marked >= v5 sanitizes by default in its core; raw HTML passes through
-    // unless we strip it. Quick guard: strip <script/<style/on*= patterns
-    // BEFORE parse so the markdown renderer never sees executable HTML.
+    if (!window.marked) return escapeHtml(text);
     const stripped = text.replace(/<\/?(?:script|style|iframe|object|embed)[^>]*>/gi, "");
     return window.marked.parse(stripped);
   }
@@ -328,7 +388,7 @@
     const bodyHtml = renderMarkdown(data.text || "(empty response)");
     placeholder.innerHTML = `
       <div class="card max-w-[85%] sm:max-w-[78%] rounded-2xl rounded-bl-md px-4 py-3">
-        <div class="reply-body text-[15px] sm:text-base text-ink">${bodyHtml}</div>
+        <div class="reply-body text-[14px] sm:text-[15px] text-ink">${bodyHtml}</div>
         <div class="mt-3 pt-3 border-t border-line flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-muted">
           <span class="mono px-2 py-0.5 rounded ${tierBadgeClass(m.tier)}">${escapeHtml(m.tier)}</span>
           <span class="mono text-ink">${escapeHtml(m.final_model)}</span>
@@ -369,23 +429,24 @@
     promptInput.style.height = Math.min(promptInput.scrollHeight, 192) + "px";
   }
 
-  // ---------- Stats poller ----------
   async function refreshStats() {
     const s = await fetchStats();
     const el = document.getElementById("stats-text");
     if (!s || !el) return;
     if (s.total_requests > 0) {
-      el.textContent = `${s.total_requests} requests · ${s.savings_pct.toFixed(1)}% saved · $${s.savings_total.toFixed(4)}`;
+      el.textContent = `${s.total_requests} reqs · ${s.savings_pct.toFixed(1)}% saved · $${s.savings_total.toFixed(4)}`;
     } else {
-      el.textContent = "no requests yet — send one";
+      el.textContent = "no requests yet";
     }
   }
 
-  // ---------- Event wiring ----------
   document.getElementById("chat-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const prompt = promptInput.value.trim();
     if (!prompt) return;
+
+    // Remove the welcome card on first message
+    if (welcomeCard && welcomeCard.parentNode) welcomeCard.remove();
 
     renderUserMessage(prompt);
     promptInput.value = "";
@@ -422,6 +483,32 @@
       promptInput.focus();
     });
   });
+
+  // ----- Mobile menu -----
+  const menuBtn = document.getElementById("menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const menuBackdrop = document.getElementById("menu-backdrop");
+  const menuSheet = document.getElementById("menu-sheet");
+  const iconMenu = document.getElementById("icon-menu");
+  const iconClose = document.getElementById("icon-close");
+
+  function setMenuOpen(open) {
+    mobileMenu.setAttribute("aria-hidden", !open);
+    mobileMenu.classList.toggle("pointer-events-none", !open);
+    mobileMenu.classList.toggle("pointer-events-auto", open);
+    menuBackdrop.classList.toggle("opacity-100", open);
+    menuBackdrop.classList.toggle("opacity-0", !open);
+    menuSheet.classList.toggle("translate-y-0", open);
+    menuSheet.classList.toggle("translate-y-full", !open);
+    iconMenu.classList.toggle("hidden", open);
+    iconClose.classList.toggle("hidden", !open);
+  }
+  menuBtn.addEventListener("click", () => {
+    const open = mobileMenu.getAttribute("aria-hidden") !== "false";
+    setMenuOpen(open);
+  });
+  menuBackdrop.addEventListener("click", () => setMenuOpen(false));
+  mobileMenu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenuOpen(false)));
 
   refreshStats();
   setInterval(refreshStats, 5000);

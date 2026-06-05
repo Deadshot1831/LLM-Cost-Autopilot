@@ -4,6 +4,13 @@ from autopilot.client import UnsupportedProviderError, send_request
 from autopilot.models import ComplexityTier, ModelConfig
 
 
+@pytest.fixture(autouse=True)
+def _force_provider_mocks(monkeypatch):
+    """Strip real provider env vars so dispatcher tests exercise the deterministic
+    mock paths regardless of what the developer has set locally."""
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+
 def _cfg(provider: str, model_id: str = "test-model") -> ModelConfig:
     return ModelConfig(
         provider=provider,
