@@ -18,18 +18,27 @@ from autopilot.verifying_router import VerifyingRouter
 
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
 DEFAULT_REFERENCE_MODEL = "gpt-4o"
+DEFAULT_SCORING_METHOD = "exact_match"
+
+
+def _read_verification_yaml(verification_yaml: Path | str) -> dict:
+    p = Path(verification_yaml)
+    if not p.is_file():
+        return {}
+    return yaml.safe_load(p.read_text()) or {}
 
 
 def _read_reference_model(verification_yaml: Path | str) -> str:
-    """Read reference_model from config/verification.yaml.
-
-    Falls back to DEFAULT_REFERENCE_MODEL if the file or key is absent.
-    """
-    p = Path(verification_yaml)
-    if not p.is_file():
-        return DEFAULT_REFERENCE_MODEL
-    raw = yaml.safe_load(p.read_text()) or {}
+    raw = _read_verification_yaml(verification_yaml)
     return str(raw.get("reference_model") or DEFAULT_REFERENCE_MODEL)
+
+
+def _read_scoring_method(verification_yaml: Path | str) -> str:
+    raw = _read_verification_yaml(verification_yaml)
+    val = str(raw.get("scoring_method") or DEFAULT_SCORING_METHOD)
+    if val not in ("semantic", "exact_match"):
+        return DEFAULT_SCORING_METHOD
+    return val
 
 
 @dataclass
@@ -64,10 +73,14 @@ class AppState:
         #   2. config/verification.yaml `reference_model`
         #   3. DEFAULT_REFERENCE_MODEL
         ref_id = reference_model_id or _read_reference_model(verification_yaml)
+        scoring_method = _read_scoring_method(verification_yaml)
         base_router = Router(
             classifier=classifier, routing=routing, registry=registry,
         )
-        verifier = Verifier(reference_cfg=registry.get(ref_id))
+        verifier = Verifier(
+            reference_cfg=registry.get(ref_id),
+            scoring_method=scoring_method,
+        )
         verifying_router = VerifyingRouter(
             base_router=base_router, verifier=verifier,
             failure_log_path=failure_log_path,

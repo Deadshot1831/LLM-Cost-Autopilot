@@ -2,6 +2,15 @@
 # Must exist in config/models.yaml.
 reference_model: claude-sonnet-4-6
 
+# How to score the cheap answer vs the reference answer for SHORT prompts.
+#   semantic     - cosine similarity over MiniLM embeddings (catches paraphrases,
+#                  no longer false-FAILs when the cheap answer is correct but terser
+#                  than the verbose reference). Default.
+#   exact_match  - token-set Jaccard. Fast, no dependency on torch, but punishes
+#                  verbosity gaps. Use this if you don't want sentence-transformers.
+# Long prompts always use the LLM-as-judge path regardless of this setting.
+scoring_method: semantic
+
 # Judge prompt template - used when the prompt is long (> 30 tokens).
 # {prompt}, {candidate}, {reference} are substituted.
 judge_prompt: |

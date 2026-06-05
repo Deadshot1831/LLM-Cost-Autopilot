@@ -128,3 +128,102 @@ async def test_long_prompt_uses_judge_fail(reference_cfg):
     event = await verifier.verify(prompt=long_prompt, candidate=_candidate_response("bad answer"))
     assert event.result.verdict == QualityVerdict.FAIL
     assert event.result.method == "judge"
+
+
+# ---------------------------------------------------------------------
+# Semantic scoring path (cosine similarity over MiniLM embeddings)
+# The embedding call is monkey-patched so tests don't actually load the
+# model — they verify the dispatcher routes correctly and the verdict is
+# built from the right score.
+# ---------------------------------------------------------------------
+
+async def test_semantic_scoring_pass_on_paraphrase(reference_cfg, monkeypatch):
+    """A short answer that's correct but worded differently from the
+    reference should PASS under semantic scoring (the false-FAIL case
+    that motivated this whole path)."""
+    async def fake_send(prompt, config, *, provider=None):
+        return Response(
+            text="The capital of Japan is Tokyo. It is the country's largest city and the political and economic center.",
+            input_tokens=10, output_tokens=20, latency_ms=200.0,
+            cost=0.001, model_id=config.model_id,
+        )
+
+    async def fake_cosine(a, b):
+        # Stand in for the real MiniLM call. 0.78 is well above the
+        # SEMANTIC_THRESHOLD of 0.65.
+        return 0.78
+
+    import autopilot.embeddings as emb_mod
+    monkeypatch.setattr(emb_mod, "cosine_similarity", fake_cosine)
+
+    verifier = Verifier(
+        reference_cfg=reference_cfg, send=fake_send, scoring_method="semantic",
+    )
+    event = await verifier.verify(
+        prompt="What is the capital of Japan?",
+        candidate=_candidate_response("Tokyo."),
+    )
+    assert event.result.verdict == QualityVerdict.PASS
+    assert event.result.method == "semantic"
+    assert abs(event.result.score - 0.78) < 1e-9
+
+
+async def test_semantic_scoring_fails_when_unrelated(reference_cfg, monkeypatch):
+    async def fake_send(prompt, config, *, provider=None):
+        return Response(
+            text="The capital of Japan is Tokyo.",
+            input_tokens=8, output_tokens=8, latency_ms=200.0,
+            cost=0.001, model_id=config.model_id,
+        )
+
+    async def fake_cosine(a, b):
+        return 0.18  # well below threshold
+
+    import autopilot.embeddings as emb_mod
+    monkeypatch.setattr(emb_mod, "cosine_similarity", fake_cosine)
+
+    verifier = Verifier(
+        reference_cfg=reference_cfg, send=fake_send, scoring_method="semantic",
+    )
+    event = await verifier.verify(
+        prompt="What is the capital of Japan?",
+        candidate=_candidate_response("I have no idea what you're asking."),
+    )
+    assert event.result.verdict == QualityVerdict.FAIL
+    assert event.result.method == "semantic"
+
+
+async def test_semantic_falls_back_to_exact_match_on_import_failure(
+    reference_cfg, monkeypatch,
+):
+    """If the embedding stack fails (e.g., torch not installed in CI), the
+    verifier degrades to exact_match instead of crashing."""
+    async def fake_send(prompt, config, *, provider=None):
+        return Response(
+            text="Tokyo",  # exact-match Jaccard with "Tokyo." -> 1.0 -> PASS
+            input_tokens=2, output_tokens=1, latency_ms=200.0,
+            cost=0.001, model_id=config.model_id,
+        )
+
+    async def broken_cosine(a, b):
+        raise RuntimeError("simulated torch import failure")
+
+    import autopilot.embeddings as emb_mod
+    monkeypatch.setattr(emb_mod, "cosine_similarity", broken_cosine)
+
+    verifier = Verifier(
+        reference_cfg=reference_cfg, send=fake_send, scoring_method="semantic",
+    )
+    event = await verifier.verify(
+        prompt="capital of Japan?",
+        candidate=_candidate_response("Tokyo"),
+    )
+    # Verdict came from the fallback exact-match path
+    assert event.result.method == "exact_match"
+    assert "semantic unavailable" in event.result.detail
+    assert event.result.verdict == QualityVerdict.PASS  # Jaccard("tokyo","tokyo")=1.0
+
+
+def test_verifier_rejects_unknown_scoring_method(reference_cfg):
+    with pytest.raises(ValueError):
+        Verifier(reference_cfg=reference_cfg, scoring_method="bogus")  # type: ignore[arg-type]

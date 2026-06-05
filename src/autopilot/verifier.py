@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 import re
 from dataclasses import dataclass
-from typing import Awaitable, Callable, Optional
+from typing import Awaitable, Callable, Literal, Optional
 
 from autopilot.client import send_request as default_send
 from autopilot.models import ModelConfig, Response
@@ -14,9 +14,11 @@ from autopilot.quality import (
     VerdictResult,
     exact_match_score,
     is_short_prompt,
+    score_semantic,
 )
 
 SendFn = Callable[..., Awaitable[Response]]
+ScoringMethod = Literal["semantic", "exact_match"]
 
 
 def _default_judge_prompt(prompt: str, candidate: str, reference: str) -> str:
@@ -48,14 +50,18 @@ class Verifier:
         sample_rate: float = 1.0,
         judge_prompt: Callable[[str, str, str], str] = _default_judge_prompt,
         rng_seed: int = 0,
+        scoring_method: ScoringMethod = "exact_match",
     ) -> None:
         if not (0.0 <= sample_rate <= 1.0):
             raise ValueError("sample_rate must be in [0, 1]")
+        if scoring_method not in ("semantic", "exact_match"):
+            raise ValueError(f"unknown scoring_method: {scoring_method!r}")
         self._reference_cfg = reference_cfg
         self._send = send
         self._sample_rate = sample_rate
         self._judge_prompt = judge_prompt
         self._rng = random.Random(rng_seed)
+        self._scoring_method = scoring_method
 
     async def verify(self, *, prompt: str, candidate: Response) -> VerificationEvent:
         if candidate.model_id == self._reference_cfg.model_id:
@@ -86,6 +92,28 @@ class Verifier:
             return VerdictResult(QualityVerdict.SKIP, 0.0, "skip", "empty reference")
 
         if is_short_prompt(prompt):
+            if self._scoring_method == "semantic":
+                # Cosine similarity over MiniLM embeddings. Catches semantic
+                # equivalence regardless of verbosity (e.g. "Tokyo." vs the
+                # reference's 25-word answer about Tokyo). Falls back to
+                # exact-match if the embedding stack fails to load at runtime.
+                try:
+                    from autopilot.embeddings import cosine_similarity
+                    s = await cosine_similarity(candidate_text, reference_text)
+                    return score_semantic(s)
+                except Exception as e:
+                    # Don't break the verifier on encoder load failure;
+                    # degrade to exact_match and record the reason.
+                    s = exact_match_score(candidate_text, reference_text)
+                    verdict = (
+                        QualityVerdict.PASS if s >= EXACT_MATCH_THRESHOLD
+                        else QualityVerdict.FAIL
+                    )
+                    return VerdictResult(
+                        verdict, s, "exact_match",
+                        f"jaccard={s:.2f} (semantic unavailable: {type(e).__name__})",
+                    )
+            # Explicit exact_match path
             s = exact_match_score(candidate_text, reference_text)
             verdict = QualityVerdict.PASS if s >= EXACT_MATCH_THRESHOLD else QualityVerdict.FAIL
             return VerdictResult(verdict, s, "exact_match", f"jaccard={s:.2f}")

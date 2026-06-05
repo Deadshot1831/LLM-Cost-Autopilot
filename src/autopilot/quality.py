@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 EXACT_MATCH_THRESHOLD = 0.7
+SEMANTIC_THRESHOLD = 0.65  # cosine similarity on MiniLM embeddings (typical range 0-1)
 JUDGE_THRESHOLD = 4.0
 SHORT_PROMPT_TOKEN_LIMIT = 30
 
@@ -48,3 +49,14 @@ def score_exact_match(candidate: str, reference: str) -> VerdictResult:
 
 def is_short_prompt(prompt: str) -> bool:
     return len(prompt.split()) <= SHORT_PROMPT_TOKEN_LIMIT
+
+
+def score_semantic(score: float) -> VerdictResult:
+    """Build a VerdictResult from a precomputed cosine similarity score.
+
+    The actual embedding call lives in autopilot.embeddings (async); this
+    function exists so the verdict-building logic is testable without
+    touching the model.
+    """
+    verdict = QualityVerdict.PASS if score >= SEMANTIC_THRESHOLD else QualityVerdict.FAIL
+    return VerdictResult(verdict, score, "semantic", f"cosine={score:.2f}")

@@ -3,12 +3,33 @@ import pytest
 from autopilot.quality import (
     EXACT_MATCH_THRESHOLD,
     JUDGE_THRESHOLD,
+    SEMANTIC_THRESHOLD,
     QualityVerdict,
     VerdictResult,
     exact_match_score,
     is_short_prompt,
     score_exact_match,
+    score_semantic,
 )
+
+
+class TestScoreSemantic:
+    def test_high_score_passes(self):
+        r = score_semantic(0.91)
+        assert r.verdict == QualityVerdict.PASS
+        assert r.method == "semantic"
+        assert "cosine=0.91" in r.detail
+
+    def test_low_score_fails(self):
+        r = score_semantic(0.20)
+        assert r.verdict == QualityVerdict.FAIL
+        assert r.method == "semantic"
+
+    def test_threshold_boundary_passes(self):
+        # >= SEMANTIC_THRESHOLD is PASS
+        assert score_semantic(SEMANTIC_THRESHOLD).verdict == QualityVerdict.PASS
+        # just under is FAIL
+        assert score_semantic(SEMANTIC_THRESHOLD - 0.01).verdict == QualityVerdict.FAIL
 
 
 class TestExactMatchScore:
