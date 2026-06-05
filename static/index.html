@@ -181,9 +181,8 @@
         <li><a href="https://github.com/Deadshot1831/LLM-Cost-Autopilot" target="_blank" rel="noopener" class="text-[14px] text-ink hover:text-muted transition-colors duration-300">GitHub</a></li>
       </ul>
     </div>
-    <!-- RIGHT: live stats pill + status (desktop only) -->
+    <!-- RIGHT: live stats pill (desktop only) -->
     <div class="hidden md:flex items-center gap-3 pr-1">
-      <span class="hidden lg:inline text-[13px] text-muted">Powered by Claude</span>
       <div id="stats-pill" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-line bg-white mono text-[12px] text-muted" role="status" aria-live="polite">
         <span class="w-2 h-2 rounded-full bg-orange" aria-hidden="true"></span>
         <span id="stats-text">loading…</span>
@@ -203,10 +202,6 @@
 <div id="mobile-menu" class="md:hidden fixed inset-0 z-50 pointer-events-none" aria-hidden="true">
   <div id="menu-backdrop" class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-500"></div>
   <div id="menu-sheet" class="absolute left-0 right-0 bottom-0 mx-3 mb-3 bg-white rounded-2xl p-6 translate-y-full transition-transform duration-500" style="transition-timing-function: cubic-bezier(0.32,0.72,0,1);">
-    <div class="inline-flex items-center gap-1.5 text-[12px] text-muted border border-line rounded-full px-3 py-1 mb-6">
-      <span class="w-1.5 h-1.5 rounded-full bg-orange"></span>
-      Powered by Claude
-    </div>
     <ul class="space-y-3 mb-6">
       <li><a href="#" class="text-[28px] leading-[32px] font-medium text-ink">Chat</a></li>
       <li><a href="/docs" class="text-[28px] leading-[32px] font-medium text-ink">API Docs</a></li>
