@@ -44,3 +44,6 @@ markers = [
     "integration: real-API tests (require OPENAI_API_KEY, opt-in via -m integration)",
 ]
 addopts = "-ra --strict-markers"
+
+[tool.vercel]
+entrypoint = "src.autopilot.api.main:app"
