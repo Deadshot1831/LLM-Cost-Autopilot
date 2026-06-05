@@ -18,9 +18,18 @@ dependencies = [
     "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
     "scikit-learn>=1.8.0",
-    "sentence-transformers>=5.5.1",
     "streamlit>=1.57.0",
     "uvicorn[standard]>=0.46.0",
+]
+
+# Optional deps. Install with `uv sync --extra semantic` (or via pip with
+# `.[semantic]`) to enable the semantic verifier. Excluded from the default
+# install so the Docker image stays under Render's 512 MB free-tier RAM.
+# When the package isn't present, autopilot.verifier transparently falls back
+# to exact_match scoring (verified by test_semantic_falls_back_to_exact_match).
+[project.optional-dependencies]
+semantic = [
+    "sentence-transformers>=5.5.1",
 ]
 
 [build-system]

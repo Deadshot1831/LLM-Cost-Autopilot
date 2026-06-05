@@ -21,18 +21,21 @@ from autopilot.api.state import AppState  # noqa: E402
 state = AppState.from_paths()
 app = create_app(state)
 
-# Warm the embeddings model if the verifier is using semantic scoring.
-# First call would otherwise download the model (~80 MB) on the first
-# user request and add multi-second latency. Done synchronously here so
-# the server doesn't accept traffic until the model is ready.
+# If the verifier is configured for semantic scoring AND the optional
+# `sentence-transformers` extra is installed, warm the model now so the
+# first user request doesn't pay the ~80 MB download + load cost.
+# If the extra is NOT installed (e.g., on a memory-constrained PaaS like
+# Render's free tier), the import will fail here; we log it and continue.
+# The verifier itself handles the runtime fallback to exact_match scoring -
+# see autopilot.verifier._score and test_semantic_falls_back_to_exact_match.
 try:
-    from autopilot.verifier import Verifier as _V
     _verifier = state.verifier
     if getattr(_verifier, "_scoring_method", None) == "semantic":
         from autopilot import embeddings
         embeddings.warmup()
 except Exception as _e:  # pragma: no cover
-    # Don't block startup if the model can't be loaded; the verifier
-    # already falls back to exact_match on import failure.
     import logging
-    logging.warning("embeddings warmup skipped: %s: %s", type(_e).__name__, _e)
+    logging.warning(
+        "embeddings warmup skipped (%s: %s) - verifier will fall back to exact_match",
+        type(_e).__name__, _e,
+    )

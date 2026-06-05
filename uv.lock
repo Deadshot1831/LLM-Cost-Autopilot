@@ -100,9 +100,13 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "scikit-learn" },
-    { name = "sentence-transformers" },
     { name = "streamlit" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+semantic = [
+    { name = "sentence-transformers" },
 ]
 
 [package.dev-dependencies]
@@ -127,10 +131,11 @@ requires-dist = [
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "scikit-learn", specifier = ">=1.8.0" },
-    { name = "sentence-transformers", specifier = ">=5.5.1" },
+    { name = "sentence-transformers", marker = "extra == 'semantic'", specifier = ">=5.5.1" },
     { name = "streamlit", specifier = ">=1.57.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.46.0" },
 ]
+provides-extras = ["semantic"]
 
 [package.metadata.requires-dev]
 dev = [
