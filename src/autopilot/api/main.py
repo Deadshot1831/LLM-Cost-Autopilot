@@ -8,8 +8,15 @@ Or via docker-compose:
 """
 from __future__ import annotations
 
-from autopilot.api.app import create_app
-from autopilot.api.state import AppState
+from dotenv import load_dotenv
+
+# Load .env at process start so OPENAI_API_KEY / ANTHROPIC_API_KEY are
+# available to the providers when send_request is first invoked. Safe to
+# call even when .env is absent.
+load_dotenv()
+
+from autopilot.api.app import create_app  # noqa: E402
+from autopilot.api.state import AppState  # noqa: E402
 
 state = AppState.from_paths()
 app = create_app(state)

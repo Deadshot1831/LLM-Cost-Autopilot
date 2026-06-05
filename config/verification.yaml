@@ -1,6 +1,6 @@
 # Reference model used to verify cheap-model responses.
 # Must exist in config/models.yaml.
-reference_model: gpt-4o
+reference_model: claude-sonnet-4-6
 
 # Judge prompt template - used when the prompt is long (> 30 tokens).
 # {prompt}, {candidate}, {reference} are substituted.

@@ -1,4 +1,4 @@
 routing:
-  simple: gpt-4o-mini
-  moderate: gpt-4o-mini
-  complex: gpt-4o
+  simple: claude-haiku-4-5
+  moderate: claude-haiku-4-5
+  complex: claude-sonnet-4-6

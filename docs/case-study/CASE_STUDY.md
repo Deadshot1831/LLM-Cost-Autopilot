@@ -20,9 +20,9 @@ agrees with what the expensive model would have said. On disagreement,
 the request auto-escalates and the failure becomes a training example
 for the classifier.
 
-![Chat UI showing a simple prompt routed to gpt-4o-mini (cost $0.000006) next to a complex prompt routed to gpt-4o (cost $0.001485)](screenshots/chat-conversation-desktop.png)
+![Claude Cost Autopilot chat UI: simple prompt routed to claude-haiku-4-5 next to a Markdown-rendered complex reply from claude-sonnet-4-6](screenshots/claude-chat-complex.png)
 
-The user-facing chat UI: every reply shows the routing decision (tier, model, cost, latency, verdict) under it. The contrast between "simple → gpt-4o-mini at $0.000006" and "complex → gpt-4o at $0.001485" is the whole product visualized in one screen.
+The user-facing chat UI demoing real Claude routing. Each reply shows the routing decision (tier, model, cost, latency, verdict) underneath. Markdown is rendered for the bold/lists/code blocks Claude returns by default. The current live deployment routes between `claude-haiku-4-5` (simple/moderate) and `claude-sonnet-4-6` (complex + verifier reference); the same code paths work identically against the OpenAI registry — just edit `config/routing.yaml` and `config/verification.yaml`.
 
 ## Architecture
 

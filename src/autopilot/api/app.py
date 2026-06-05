@@ -47,12 +47,23 @@ def create_app(state: AppState) -> FastAPI:
             result = await s.logging_router.route_request(req.prompt)
         except ValueError as e:
             # OpenAIProvider raises ValueError when OPENAI_API_KEY is missing.
-            # Surface a clean 503 so the chat UI can show a helpful message.
             if "api key" in str(e).lower():
                 raise HTTPException(
                     status_code=503,
                     detail="OPENAI_API_KEY not configured on the server. Add it to .env and restart.",
                 )
+            raise
+        except Exception as e:
+            # Surface OpenAI/Anthropic SDK errors with their actual messages
+            # instead of letting them bubble up as a generic 500.
+            name = type(e).__name__
+            if name in {"RateLimitError", "APIStatusError", "AuthenticationError",
+                        "PermissionDeniedError", "BadRequestError", "APIError"}:
+                # Map quota errors to 402 (Payment Required) for clarity in the UI.
+                status = 402 if "quota" in str(e).lower() or "billing" in str(e).lower() else 502
+                # Pull just the human-friendly message if the SDK exposes it.
+                msg = getattr(e, "message", None) or str(e)
+                raise HTTPException(status_code=status, detail=f"{name}: {msg}")
             raise
         return CompletionResponse(
             text=result.final_response.text,

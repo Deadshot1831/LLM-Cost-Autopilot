@@ -4,6 +4,8 @@ import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 
+import yaml
+
 from autopilot.classifier import ComplexityClassifier
 from autopilot.db import open_db
 from autopilot.logging_router import LoggingRouter
@@ -15,6 +17,19 @@ from autopilot.verifier import Verifier
 from autopilot.verifying_router import VerifyingRouter
 
 ROOT = Path(__file__).resolve().parent.parent.parent.parent
+DEFAULT_REFERENCE_MODEL = "gpt-4o"
+
+
+def _read_reference_model(verification_yaml: Path | str) -> str:
+    """Read reference_model from config/verification.yaml.
+
+    Falls back to DEFAULT_REFERENCE_MODEL if the file or key is absent.
+    """
+    p = Path(verification_yaml)
+    if not p.is_file():
+        return DEFAULT_REFERENCE_MODEL
+    raw = yaml.safe_load(p.read_text()) or {}
+    return str(raw.get("reference_model") or DEFAULT_REFERENCE_MODEL)
 
 
 @dataclass
@@ -35,18 +50,24 @@ class AppState:
         *,
         models_yaml: Path | str = ROOT / "config" / "models.yaml",
         routing_yaml: Path | str = ROOT / "config" / "routing.yaml",
+        verification_yaml: Path | str = ROOT / "config" / "verification.yaml",
         classifier_path: Path | str = ROOT / "models" / "classifier.joblib",
         db_path: Path | str = ROOT / "data" / "autopilot.db",
         failure_log_path: Path | str = ROOT / "data" / "routing_failures.jsonl",
-        reference_model_id: str = "gpt-4o",
+        reference_model_id: str | None = None,
     ) -> "AppState":
         registry = load_registry(models_yaml)
         routing = load_routing_config(routing_yaml)
         classifier = ComplexityClassifier.load(classifier_path)
+        # Reference model resolution order:
+        #   1. explicit kwarg
+        #   2. config/verification.yaml `reference_model`
+        #   3. DEFAULT_REFERENCE_MODEL
+        ref_id = reference_model_id or _read_reference_model(verification_yaml)
         base_router = Router(
             classifier=classifier, routing=routing, registry=registry,
         )
-        verifier = Verifier(reference_cfg=registry.get(reference_model_id))
+        verifier = Verifier(reference_cfg=registry.get(ref_id))
         verifying_router = VerifyingRouter(
             base_router=base_router, verifier=verifier,
             failure_log_path=failure_log_path,

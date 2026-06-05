@@ -7,7 +7,9 @@
 > Full case study: [docs/case-study/CASE_STUDY.md](docs/case-study/CASE_STUDY.md)
 > · auto-generated report: [docs/case-study/REPORT.md](docs/case-study/REPORT.md)
 
-![Chat UI showing a simple prompt routed to gpt-4o-mini (cost $0.000006) next to a complex prompt routed to gpt-4o (cost $0.001485) — same UX, ~250× cost spread](docs/case-study/screenshots/chat-conversation-desktop.png)
+![Claude Cost Autopilot chat UI: simple prompt routed to claude-haiku-4-5 next to a Markdown-rendered complex reply from claude-sonnet-4-6, with per-message cost/latency/verdict meta strip](docs/case-study/screenshots/claude-chat-complex.png)
+
+> The live demo currently runs on Claude (`claude-haiku-4-5` → `claude-sonnet-4-6` end-to-end). The 41.5% savings figure below was measured on a separate 500-request simulation using OpenAI pricing — the same routing logic, applied to a different cost curve. Both providers (and the registry's mocked Ollama tier) plug into the identical `Provider` interface.
 
 ---
 
